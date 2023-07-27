@@ -36,7 +36,8 @@ func main() {
 	for running {
 		window.UpdateSurface()
 
-		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+		event := sdl.WaitEventTimeout(10)
+		if event != nil {
 			switch event.(type) {
 			case *sdl.QuitEvent:
 				println("Quit")
