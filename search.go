@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/notnil/chess"
@@ -29,8 +28,8 @@ func PieceValues(squareMap map[chess.Square]chess.Piece, color chess.Color) (tot
 
 func Heuristic(squareMap map[chess.Square]chess.Piece, color chess.Color) float64 {
 	pieces := float64(PieceValues(squareMap, color))
-	fmt.Println("here")
-	return pieces
+	other := float64(PieceValues(squareMap, color.Other()))
+	return pieces - other
 }
 
 func Utility(game *chess.Game, color chess.Color) float64 {
@@ -95,7 +94,8 @@ func ValorMax(game *chess.Game, alpha, beta float64, depth int) (float64, *chess
 
 	moves := OrderMoves(game.ValidMoves())
 	for _, move := range moves {
-		v2, _ := ValorMin(Result(game, move), alpha, beta, depth-1)
+		v2, _ := ValorMin(Result(game, move), alpha, beta, depth)
+		// cada nível é uma jogada, não um turno
 
 		if v2 > v {
 			v, bestMove = v2, move
@@ -114,7 +114,7 @@ func ValorMin(game *chess.Game, alpha, beta float64, depth int) (float64, *chess
 	turn := game.Position().Turn()
 	var bestMove *chess.Move = nil
 
-	if game.Outcome() != chess.NoOutcome || depth == 0 {
+	if game.Outcome() != chess.NoOutcome {
 		return Utility(game, turn), nil
 	}
 
@@ -122,13 +122,12 @@ func ValorMin(game *chess.Game, alpha, beta float64, depth int) (float64, *chess
 
 	moves := OrderMoves(game.ValidMoves())
 	for _, move := range moves {
-		v2, _ := ValorMin(Result(game, move), alpha, beta, depth-1)
+		v2, _ := ValorMax(Result(game, move), alpha, beta, depth-1)
 
 		if v2 < v {
 			v, bestMove = v2, move
-			beta = math.Max(beta, v)
+			beta = math.Min(beta, v)
 		}
-
 		if v <= alpha {
 			return v, bestMove
 		}
