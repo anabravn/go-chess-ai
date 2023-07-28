@@ -2,10 +2,11 @@ package main
 
 import (
 	"github.com/notnil/chess"
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-const ScreenWidth, ScreenHeight = 600, 600
+const ScreenWidth, ScreenHeight = 600, 500
 const SquareSize = 50
 
 var (
@@ -76,7 +77,7 @@ func fillRect(x, y, w, h int, color sdl.Color, surface *sdl.Surface) {
 	surface.FillRect(&rect, pixel)
 }
 
-func NewBoardUI(pieces *sdl.Surface) *BoardUI {
+func NewBoardUI() *BoardUI {
 	size := 8 * SquareSize
 	boardSurface, _ := sdl.CreateRGBSurface(0, int32(size), int32(size), 32, 0, 0, 0, 0)
 
@@ -85,6 +86,8 @@ func NewBoardUI(pieces *sdl.Surface) *BoardUI {
 
 	piecesSurface, _ := sdl.CreateRGBSurface(0, int32(size), int32(size), 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000)
 	piecesSurface.SetBlendMode(sdl.BLENDMODE_BLEND)
+
+	pieces, _ := img.Load("pieces.png")
 
 	var board = &BoardUI{
 		Size:          size,
@@ -166,4 +169,30 @@ func (b *BoardUI) GetSquare(x, y int32) chess.Square {
 	rank := (7 - ((y - offsetY) / SquareSize))
 
 	return chess.NewSquare(chess.File(file), chess.Rank(rank))
+}
+
+var startSquare chess.Square = chess.NoSquare
+
+func (b *BoardUI) GetSelectedMove(squareMap map[chess.Square]chess.Piece, moves []*chess.Move) *chess.Move {
+	mouseX, mouseY, mousePressed := sdl.GetMouseState()
+	var nextMove *chess.Move = nil
+
+	if mousePressed == 1 {
+		endSquare := b.GetSquare(mouseX, mouseY)
+		hints := GetHints(moves, endSquare)
+
+		if len(hints) > 0 {
+			b.BlitHints(squareMap, hints, endSquare)
+			startSquare = endSquare
+			nextMove = nil
+		} else if startSquare != chess.NoSquare {
+			nextMove = GetPieceMove(moves, startSquare, endSquare, squareMap)
+
+			b.ClearHints()
+
+			startSquare = chess.NoSquare
+		}
+	}
+
+	return nextMove
 }

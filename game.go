@@ -16,14 +16,11 @@ func GetHints(moves []*chess.Move, startSquare chess.Square) []*chess.Move {
 	return hints
 }
 
-func GetSelectedMove(moves []*chess.Move, piece chess.Piece, square chess.Square,
+func GetPieceMove(moves []*chess.Move, startSquare chess.Square, endSquare chess.Square,
 	squareMap map[chess.Square]chess.Piece) *chess.Move {
 	for _, move := range moves {
-		if square == move.S2() {
-			s2 := squareMap[move.S1()]
-			if s2 == piece {
-				return move
-			}
+		if endSquare == move.S2() && startSquare == move.S1() {
+			return move
 		}
 	}
 

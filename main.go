@@ -9,30 +9,24 @@ import (
 func main() {
 	sdl.Init(sdl.INIT_EVERYTHING)
 	defer sdl.Quit()
-
 	img.Init(img.INIT_PNG)
 
-	window, _ := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
+	window, _ := sdl.CreateWindow("Go Chess AI",
+		sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
 		ScreenWidth, ScreenHeight, sdl.WINDOW_SHOWN)
 	defer window.Destroy()
-
 	surface, _ := window.GetSurface()
 	surface.FillRect(nil, 0)
 
-	pieces, _ := img.Load("pieces.png")
-	board := NewBoardUI(pieces)
-
-	running := true
-
+	board := NewBoardUI()
 	game := chess.NewGame()
+	var nextMove *chess.Move
 
 	squareMap := game.Position().Board().SquareMap()
 	moves := game.ValidMoves()
 	board.Update(squareMap)
 
-	selected := chess.NoPiece
-	var nextMove *chess.Move = nil
-
+	running := true
 	for running {
 		window.UpdateSurface()
 
@@ -45,29 +39,17 @@ func main() {
 			}
 		}
 
-		mouseX, mouseY, mousePressed := sdl.GetMouseState()
+		if game.Position().Turn() == chess.White {
+			nextMove = board.GetSelectedMove(squareMap, moves)
+		} else {
+			nextMove = Search(game, 2)
+		}
 
-		if mousePressed == 1 {
-			square := board.GetSquare(mouseX, mouseY)
-			hints := GetHints(moves, square)
-
-			if len(hints) > 0 {
-				board.BlitHints(squareMap, hints, square)
-				selected = squareMap[square]
-				nextMove = nil
-			} else if selected != chess.NoPiece {
-				nextMove = GetSelectedMove(moves, selected, square, squareMap)
-
-				game.Move(nextMove)
-
-				squareMap = game.Position().Board().SquareMap()
-				moves = game.ValidMoves()
-
-				board.Update(squareMap)
-				board.ClearHints()
-
-				selected = chess.NoPiece
-			}
+		if nextMove != nil {
+			game.Move(nextMove)
+			squareMap = game.Position().Board().SquareMap()
+			moves = game.ValidMoves()
+			board.Update(squareMap)
 		}
 
 		board.Draw(surface)
