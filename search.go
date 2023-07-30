@@ -6,17 +6,15 @@ import (
 	"github.com/notnil/chess"
 )
 
-var values = map[chess.PieceType]int{
-	chess.NoPieceType: 0,
-	chess.King:        0,
-	chess.Pawn:        1,
-	chess.Knight:      3,
-	chess.Bishop:      3,
-	chess.Rook:        5,
-	chess.Queen:       9,
+var values = map[chess.PieceType]float64{
+	chess.Pawn:   10,
+	chess.Knight: 30,
+	chess.Bishop: 30,
+	chess.Rook:   50,
+	chess.Queen:  90,
 }
 
-func PieceValues(squareMap map[chess.Square]chess.Piece, color chess.Color) (total int) {
+func PieceValues(squareMap map[chess.Square]chess.Piece, color chess.Color) (total float64) {
 	for _, piece := range squareMap {
 		if piece.Color() == color {
 			total += values[piece.Type()]
@@ -26,10 +24,28 @@ func PieceValues(squareMap map[chess.Square]chess.Piece, color chess.Color) (tot
 	return
 }
 
+func PieceSquareValues(squareMap map[chess.Square]chess.Piece, color chess.Color) (total float64) {
+	for square, piece := range squareMap {
+		if piece.Color() == color {
+			file, rank := square.File(), square.Rank()
+
+			if color == chess.Black {
+				rank = 7 - rank
+			}
+
+			total += piecesSquares[piece.Type()][int(file)*8+int(rank)]
+		}
+	}
+
+	return
+}
+
 func Heuristic(squareMap map[chess.Square]chess.Piece, color chess.Color) float64 {
-	pieces := float64(PieceValues(squareMap, color))
-	other := float64(PieceValues(squareMap, color.Other()))
-	return pieces - other
+	pieces := PieceValues(squareMap, color)
+	position := PieceSquareValues(squareMap, color)
+	other := PieceValues(squareMap, color.Other())
+
+	return pieces + position - other
 }
 
 func Utility(game *chess.Game, color chess.Color) float64 {
@@ -60,7 +76,6 @@ func OrderMoves(moves []*chess.Move) []*chess.Move {
 	for _, move := range moves {
 		capture := move.HasTag(chess.Capture)
 		check := move.HasTag(chess.Check)
-		move.S1()
 
 		if check {
 			checkMoves = append(checkMoves, move)
@@ -78,24 +93,23 @@ func OrderMoves(moves []*chess.Move) []*chess.Move {
 }
 
 func Search(game *chess.Game, depth int) *chess.Move {
-	_, move := ValorMax(game, math.Inf(-1), math.Inf(1), depth)
+	player := game.Position().Turn()
+	_, move := ValorMax(game, math.Inf(-1), math.Inf(1), depth, player)
 	return move
 }
 
-func ValorMax(game *chess.Game, alpha, beta float64, depth int) (float64, *chess.Move) {
-	turn := game.Position().Turn()
+func ValorMax(game *chess.Game, alpha, beta float64, depth int, player chess.Color) (float64, *chess.Move) {
 	var bestMove *chess.Move = nil
 
 	if game.Outcome() != chess.NoOutcome || depth == 0 {
-		return Utility(game, turn), nil
+		return Utility(game, player), nil
 	}
 
 	v := math.Inf(-1)
 
 	moves := OrderMoves(game.ValidMoves())
 	for _, move := range moves {
-		v2, _ := ValorMin(Result(game, move), alpha, beta, depth)
-		// cada nível é uma jogada, não um turno
+		v2, _ := ValorMin(Result(game, move), alpha, beta, depth, player)
 
 		if v2 > v {
 			v, bestMove = v2, move
@@ -110,19 +124,18 @@ func ValorMax(game *chess.Game, alpha, beta float64, depth int) (float64, *chess
 	return v, bestMove
 }
 
-func ValorMin(game *chess.Game, alpha, beta float64, depth int) (float64, *chess.Move) {
-	turn := game.Position().Turn()
+func ValorMin(game *chess.Game, alpha, beta float64, depth int, player chess.Color) (float64, *chess.Move) {
 	var bestMove *chess.Move = nil
 
 	if game.Outcome() != chess.NoOutcome {
-		return Utility(game, turn), nil
+		return Utility(game, player), nil
 	}
 
 	v := math.Inf(1)
 
 	moves := OrderMoves(game.ValidMoves())
 	for _, move := range moves {
-		v2, _ := ValorMax(Result(game, move), alpha, beta, depth-1)
+		v2, _ := ValorMax(Result(game, move), alpha, beta, depth-1, player)
 
 		if v2 < v {
 			v, bestMove = v2, move

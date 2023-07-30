@@ -42,7 +42,7 @@ func main() {
 		if game.Position().Turn() == chess.White {
 			nextMove = board.GetSelectedMove(squareMap, moves)
 		} else {
-			nextMove = Search(game, 1)
+			nextMove = Search(game, 2)
 		}
 
 		if nextMove != nil {
