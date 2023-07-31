@@ -170,29 +170,3 @@ func (b *BoardUI) GetSquare(x, y int32) chess.Square {
 
 	return chess.NewSquare(chess.File(file), chess.Rank(rank))
 }
-
-var startSquare chess.Square = chess.NoSquare
-
-func (b *BoardUI) GetSelectedMove(squareMap map[chess.Square]chess.Piece, moves []*chess.Move) *chess.Move {
-	mouseX, mouseY, mousePressed := sdl.GetMouseState()
-	var nextMove *chess.Move = nil
-
-	if mousePressed == 1 {
-		endSquare := b.GetSquare(mouseX, mouseY)
-		hints := GetHints(moves, endSquare)
-
-		if len(hints) > 0 {
-			b.BlitHints(squareMap, hints, endSquare)
-			startSquare = endSquare
-			nextMove = nil
-		} else if startSquare != chess.NoSquare {
-			nextMove = GetPieceMove(moves, startSquare, endSquare, squareMap)
-
-			b.ClearHints()
-
-			startSquare = chess.NoSquare
-		}
-	}
-
-	return nextMove
-}
