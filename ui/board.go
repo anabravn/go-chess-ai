@@ -1,4 +1,4 @@
-package main
+package ui
 
 import (
 	"github.com/notnil/chess"
@@ -87,7 +87,7 @@ func NewBoardUI() *BoardUI {
 	piecesSurface, _ := sdl.CreateRGBSurface(0, int32(size), int32(size), 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000)
 	piecesSurface.SetBlendMode(sdl.BLENDMODE_BLEND)
 
-	pieces, _ := img.Load("pieces.png")
+	pieces, _ := img.Load("assets/pieces.png")
 
 	var board = &BoardUI{
 		Size:          size,

@@ -1,6 +1,7 @@
-package main
+package ui
 
 import (
+	"ai"
 	"fmt"
 
 	"github.com/notnil/chess"
@@ -34,9 +35,9 @@ func NewGame() *Game {
 func (g *Game) Search() {
 	g.searching = true
 
-	g.nextMove = Search(g.game, 4)
-	fmt.Println("White: ", Eval(g.game.Position(), chess.White))
-	fmt.Println("Black: ", Eval(g.game.Position(), chess.Black))
+	g.nextMove = ai.Search(g.game, 4)
+	fmt.Println("White: ", ai.Eval(g.game.Position(), chess.White))
+	fmt.Println("Black: ", ai.Eval(g.game.Position(), chess.Black))
 
 	g.searching = false
 }

@@ -1,18 +1,20 @@
 package main
 
 import (
+	"ui"
+
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 func CreateWindow() *sdl.Window {
-    window, _ := sdl.CreateWindow("Go Chess AI",
+	window, _ := sdl.CreateWindow("Go Chess AI",
 		sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		ScreenWidth, ScreenHeight, sdl.WINDOW_SHOWN)
+		ui.ScreenWidth, ui.ScreenHeight, sdl.WINDOW_SHOWN)
 	surface, _ := window.GetSurface()
 	surface.FillRect(nil, 0)
 
-    return window
+	return window
 }
 
 func main() {
@@ -20,11 +22,11 @@ func main() {
 	defer sdl.Quit()
 	img.Init(img.INIT_PNG)
 
-    window := CreateWindow()
+	window := CreateWindow()
 	defer window.Destroy()
 	surface, _ := window.GetSurface()
 
-    game := NewGame()
+	game := ui.NewGame()
 
 	running := true
 	for running {
@@ -39,8 +41,8 @@ func main() {
 			}
 		}
 
-        game.Update()
-        game.Draw(surface)
+		game.Update()
+		game.Draw(surface)
 
 	}
 }

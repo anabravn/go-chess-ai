@@ -1,4 +1,4 @@
-module chess-ai
+module ui
 
 go 1.20
 

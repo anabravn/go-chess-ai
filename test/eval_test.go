@@ -1,6 +1,7 @@
-package main
+package test
 
 import (
+	"ai"
 	"math"
 	"strings"
 	"testing"
@@ -13,14 +14,14 @@ func TestPieceValues(t *testing.T) {
 	want := 4000
 
 	t.Run("White", func(t *testing.T) {
-		got := PieceValues(squareMap, chess.White)
+		got := ai.PieceValues(squareMap, chess.White)
 		if got != want {
 			t.Errorf("got %d want %d", got, want)
 		}
 	})
 
 	t.Run("Black", func(t *testing.T) {
-		got := PieceValues(squareMap, chess.Black)
+		got := ai.PieceValues(squareMap, chess.Black)
 		if got != want {
 			t.Errorf("got %d want %d", got, want)
 		}
@@ -32,7 +33,7 @@ func TestSquareValues(t *testing.T) {
 	want := -95
 
 	t.Run("White", func(t *testing.T) {
-		got := SquareValues(squareMap, chess.White)
+		got := ai.SquareValues(squareMap, chess.White)
 
 		if got != want {
 			t.Errorf("got %d want %d", got, want)
@@ -40,7 +41,7 @@ func TestSquareValues(t *testing.T) {
 	})
 
 	t.Run("Black", func(t *testing.T) {
-		got := SquareValues(squareMap, chess.Black)
+		got := ai.SquareValues(squareMap, chess.Black)
 
 		if got != want {
 			t.Errorf("got %d want %d", got, want)
@@ -51,7 +52,7 @@ func TestSquareValues(t *testing.T) {
 func TestEval(t *testing.T) {
 	t.Run("No Outcome", func(t *testing.T) {
 		want := 0.0
-		got := Eval(chess.StartingPosition(), chess.White)
+		got := ai.Eval(chess.StartingPosition(), chess.White)
 
 		if got != want {
 			t.Errorf("got %f want %f", got, want)
@@ -66,7 +67,7 @@ func TestEval(t *testing.T) {
 		game := chess.NewGame(pgn)
 
 		want := math.Inf(1)
-		got := Eval(game.Position(), chess.Black)
+		got := ai.Eval(game.Position(), chess.Black)
 
 		if got != want {
 			t.Errorf("got %f want %f", got, want)
