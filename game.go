@@ -24,20 +24,28 @@ func NewGame() *Game {
 	g.nextMove = nil
 	g.squareMap = g.game.Position().Board().SquareMap()
 	g.validMoves = g.game.ValidMoves()
+	g.searching = false
+
 	g.board.Update(g.squareMap)
 
 	return g
+}
+
+func (g *Game) Search() {
+	g.searching = true
+
+	g.nextMove = Search(g.game, 4)
+	fmt.Println("White: ", Eval(g.game.Position(), chess.White))
+	fmt.Println("Black: ", Eval(g.game.Position(), chess.Black))
+
+	g.searching = false
 }
 
 func (g *Game) Update() {
 	if g.game.Position().Turn() == chess.White {
 		g.nextMove = g.GetSelectedMove()
 	} else if !g.searching {
-
-		fmt.Println("White: ", Eval(g.game.Position(), chess.White))
-		fmt.Println("Black: ", Eval(g.game.Position(), chess.Black))
-
-		g.nextMove = Search(g.game, 3)
+		go g.Search()
 	}
 
 	if g.nextMove != nil {
