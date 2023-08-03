@@ -2,7 +2,15 @@ package main
 
 import "github.com/notnil/chess"
 
-var piecesSquares = map[chess.PieceType][64]float64{
+var pieceValues = map[chess.PieceType]int{
+	chess.Pawn:   10,
+	chess.Knight: 30,
+	chess.Bishop: 30,
+	chess.Rook:   50,
+	chess.Queen:  90,
+}
+
+var piecesSquares = map[chess.PieceType][64]int{
 	chess.Pawn: {
 		0, 0, 0, 0, 0, 0, 0, 0,
 		50, 50, 50, 50, 50, 50, 50, 50,

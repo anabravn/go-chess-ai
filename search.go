@@ -6,25 +6,17 @@ import (
 	"github.com/notnil/chess"
 )
 
-var values = map[chess.PieceType]float64{
-	chess.Pawn:   10,
-	chess.Knight: 30,
-	chess.Bishop: 30,
-	chess.Rook:   50,
-	chess.Queen:  90,
-}
-
-func PieceValues(squareMap map[chess.Square]chess.Piece, color chess.Color) (total float64) {
+func PieceValues(squareMap map[chess.Square]chess.Piece, color chess.Color) (total int) {
 	for _, piece := range squareMap {
 		if piece.Color() == color {
-			total += values[piece.Type()]
+			total += pieceValues[piece.Type()]
 		}
 	}
 
 	return
 }
 
-func PieceSquareValues(squareMap map[chess.Square]chess.Piece, color chess.Color) (total float64) {
+func SquareValues(squareMap map[chess.Square]chess.Piece, color chess.Color) (total int) {
 	for square, piece := range squareMap {
 		if piece.Color() == color {
 			file, rank := square.File(), square.Rank()
@@ -33,22 +25,21 @@ func PieceSquareValues(squareMap map[chess.Square]chess.Piece, color chess.Color
 				rank = 7 - rank
 			}
 
-			total += piecesSquares[piece.Type()][int(file)*8+int(rank)]
+			total += piecesSquares[piece.Type()][int(rank)*8+int(file)]
 		}
 	}
 
 	return
 }
 
-func Heuristic(squareMap map[chess.Square]chess.Piece, color chess.Color) float64 {
+func Heuristic(squareMap map[chess.Square]chess.Piece, color chess.Color) int {
 	pieces := PieceValues(squareMap, color)
-	position := PieceSquareValues(squareMap, color)
-	other := PieceValues(squareMap, color.Other())
+	position := SquareValues(squareMap, color)
 
-	return pieces + position - other
+	return pieces + position
 }
 
-func Utility(game *chess.Game, color chess.Color) float64 {
+func Eval(game *chess.Game, color chess.Color) float64 {
 	if game.Outcome() == chess.Draw {
 		return 0
 	} else if game.Method() == chess.Checkmate {
@@ -59,7 +50,7 @@ func Utility(game *chess.Game, color chess.Color) float64 {
 		}
 	}
 
-	return Heuristic(game.Position().Board().SquareMap(), color)
+	return float64(Heuristic(game.Position().Board().SquareMap(), color))
 }
 
 func Result(game *chess.Game, move *chess.Move) *chess.Game {
@@ -102,49 +93,50 @@ func ValorMax(game *chess.Game, alpha, beta float64, depth int, player chess.Col
 	var bestMove *chess.Move = nil
 
 	if game.Outcome() != chess.NoOutcome || depth == 0 {
-		return Utility(game, player), nil
+		return Eval(game, player), nil
 	}
 
-	v := math.Inf(-1)
+	bestScore := math.Inf(-1)
 
 	moves := OrderMoves(game.ValidMoves())
 	for _, move := range moves {
-		v2, _ := ValorMin(Result(game, move), alpha, beta, depth, player)
+		score, _ := ValorMin(Result(game, move), alpha, beta, depth, player)
 
-		if v2 > v {
-			v, bestMove = v2, move
-			alpha = math.Max(alpha, v)
+		if score > bestScore {
+			bestScore, bestMove = score, move
+			alpha = math.Max(alpha, bestScore)
 		}
 
-		if v >= beta {
-			return v, bestMove
+		if score >= beta {
+			return score, move
 		}
 	}
 
-	return v, bestMove
+	return bestScore, bestMove
 }
 
 func ValorMin(game *chess.Game, alpha, beta float64, depth int, player chess.Color) (float64, *chess.Move) {
 	var bestMove *chess.Move = nil
 
 	if game.Outcome() != chess.NoOutcome {
-		return Utility(game, player), nil
+		return Eval(game, player), nil
 	}
 
-	v := math.Inf(1)
+	bestScore := math.Inf(1)
 
 	moves := OrderMoves(game.ValidMoves())
 	for _, move := range moves {
-		v2, _ := ValorMax(Result(game, move), alpha, beta, depth-1, player)
+		score, _ := ValorMax(Result(game, move), alpha, beta, depth-1, player)
 
-		if v2 < v {
-			v, bestMove = v2, move
-			beta = math.Min(beta, v)
+		if score < bestScore {
+			bestScore, bestMove = score, move
+			beta = math.Min(beta, bestScore)
 		}
-		if v <= alpha {
-			return v, bestMove
+
+		if score <= alpha {
+			return score, move
 		}
 	}
 
-	return v, bestMove
+	return bestScore, bestMove
 }
