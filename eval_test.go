@@ -10,7 +10,7 @@ import (
 
 func TestPieceValues(t *testing.T) {
 	squareMap := chess.StartingPosition().Board().SquareMap()
-	want := 390
+	want := 3900
 
 	t.Run("White", func(t *testing.T) {
 		got := PieceValues(squareMap, chess.White)
@@ -50,9 +50,8 @@ func TestSquareValues(t *testing.T) {
 
 func TestEval(t *testing.T) {
 	t.Run("No Outcome", func(t *testing.T) {
-		game := chess.NewGame()
-		want := 295.0 + 390.0
-		got := Eval(game, chess.White)
+		want := 295.0 + 3900.0
+		got := Eval(chess.StartingPosition(), chess.White)
 
 		if got != want {
 			t.Errorf("got %f want %f", got, want)
@@ -67,7 +66,7 @@ func TestEval(t *testing.T) {
 		game := chess.NewGame(pgn)
 
 		want := math.Inf(1)
-		got := Eval(game, chess.Black)
+		got := Eval(game.Position(), chess.Black)
 
 		if got != want {
 			t.Errorf("got %f want %f", got, want)

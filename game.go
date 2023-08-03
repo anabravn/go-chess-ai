@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/notnil/chess"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -27,18 +29,15 @@ func NewGame() *Game {
 	return g
 }
 
-func (g *Game) Search() {
-    g.searching = true
-    g.nextMove = nil
-    g.nextMove = Search(g.game, 2)
-    g.searching = false
-}
-
 func (g *Game) Update() {
 	if g.game.Position().Turn() == chess.White {
 		g.nextMove = g.GetSelectedMove()
 	} else if !g.searching {
-		go g.Search()
+
+		fmt.Println("White: ", Eval(g.game.Position(), chess.White))
+		fmt.Println("Black: ", Eval(g.game.Position(), chess.Black))
+
+		g.nextMove = Search(g.game, 3)
 	}
 
 	if g.nextMove != nil {

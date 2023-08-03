@@ -39,25 +39,21 @@ func Heuristic(squareMap map[chess.Square]chess.Piece, color chess.Color) int {
 	return pieces + position
 }
 
-func Eval(game *chess.Game, color chess.Color) float64 {
-	if game.Outcome() == chess.Draw {
-		return 0
-	} else if game.Method() == chess.Checkmate {
-		if game.Position().Turn() == color {
+func Eval(position *chess.Position, color chess.Color) float64 {
+	switch position.Status() {
+	case chess.Stalemate, chess.InsufficientMaterial,
+		chess.ThreefoldRepetition, chess.FivefoldRepetition,
+		chess.FiftyMoveRule, chess.SeventyFiveMoveRule:
+		return 0.0
+	case chess.Checkmate:
+		if position.Turn() == color {
 			return math.Inf(-1) // Loss
 		} else {
 			return math.Inf(1) // Win
 		}
 	}
 
-	return float64(Heuristic(game.Position().Board().SquareMap(), color))
-}
-
-func Result(game *chess.Game, move *chess.Move) *chess.Game {
-	newGame := game.Clone()
-	newGame.Move(move)
-
-	return newGame
+	return float64(Heuristic(position.Board().SquareMap(), color))
 }
 
 func OrderMoves(moves []*chess.Move) []*chess.Move {
@@ -85,22 +81,22 @@ func OrderMoves(moves []*chess.Move) []*chess.Move {
 
 func Search(game *chess.Game, depth int) *chess.Move {
 	player := game.Position().Turn()
-	_, move := ValorMax(game, math.Inf(-1), math.Inf(1), depth, player)
+	_, move := ValorMax(game.Position(), math.Inf(-1), math.Inf(1), depth, player)
 	return move
 }
 
-func ValorMax(game *chess.Game, alpha, beta float64, depth int, player chess.Color) (float64, *chess.Move) {
+func ValorMax(position *chess.Position, alpha, beta float64, depth int, player chess.Color) (float64, *chess.Move) {
 	var bestMove *chess.Move = nil
+	moves := OrderMoves(position.ValidMoves())
 
-	if game.Outcome() != chess.NoOutcome || depth == 0 {
-		return Eval(game, player), nil
+	if len(moves) == 0 || depth == 0 {
+		return Eval(position, player), nil
 	}
 
 	bestScore := math.Inf(-1)
 
-	moves := OrderMoves(game.ValidMoves())
 	for _, move := range moves {
-		score, _ := ValorMin(Result(game, move), alpha, beta, depth, player)
+		score, _ := ValorMin(position.Update(move), alpha, beta, depth, player)
 
 		if score > bestScore {
 			bestScore, bestMove = score, move
@@ -115,18 +111,18 @@ func ValorMax(game *chess.Game, alpha, beta float64, depth int, player chess.Col
 	return bestScore, bestMove
 }
 
-func ValorMin(game *chess.Game, alpha, beta float64, depth int, player chess.Color) (float64, *chess.Move) {
+func ValorMin(position *chess.Position, alpha, beta float64, depth int, player chess.Color) (float64, *chess.Move) {
 	var bestMove *chess.Move = nil
+	moves := OrderMoves(position.ValidMoves())
 
-	if game.Outcome() != chess.NoOutcome {
-		return Eval(game, player), nil
+	if len(moves) == 0 || depth == 0 {
+		return Eval(position, player), nil
 	}
 
 	bestScore := math.Inf(1)
 
-	moves := OrderMoves(game.ValidMoves())
 	for _, move := range moves {
-		score, _ := ValorMax(Result(game, move), alpha, beta, depth-1, player)
+		score, _ := ValorMax(position.Update(move), alpha, beta, depth-1, player)
 
 		if score < bestScore {
 			bestScore, bestMove = score, move

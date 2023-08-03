@@ -3,11 +3,11 @@ package main
 import "github.com/notnil/chess"
 
 var pieceValues = map[chess.PieceType]int{
-	chess.Pawn:   10,
-	chess.Knight: 30,
-	chess.Bishop: 30,
-	chess.Rook:   50,
-	chess.Queen:  90,
+	chess.Pawn:   100,
+	chess.Knight: 300,
+	chess.Bishop: 300,
+	chess.Rook:   500,
+	chess.Queen:  900,
 }
 
 var piecesSquares = map[chess.PieceType][64]int{

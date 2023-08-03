@@ -6,7 +6,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-const ScreenWidth, ScreenHeight = 600, 500
+const ScreenWidth, ScreenHeight = 400, 400
 const SquareSize = 50
 
 var (
