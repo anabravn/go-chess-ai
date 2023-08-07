@@ -91,7 +91,7 @@ func NegaMax(position *chess.Position, alpha, beta float64, depth int) (float64,
 	var bestMove *chess.Move = nil
 	player := position.Turn()
 
-	moves := OrderMoves(position.ValidMoves())
+	moves := position.ValidMoves()
 
 	if len(moves) == 0 || depth == 0 {
 		return Eval(position, player), nil
@@ -99,7 +99,7 @@ func NegaMax(position *chess.Position, alpha, beta float64, depth int) (float64,
 
 	bestScore := math.Inf(-1)
 
-	for _, move := range moves {
+	for _, move := range OrderMoves(moves) {
 		score, _ := NegaMax(position.Update(move), -beta, -alpha, depth-1)
 		score = -score
 

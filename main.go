@@ -41,8 +41,7 @@ func main() {
 			}
 		}
 
-		game.Update()
+		running = game.Update()
 		game.Draw(surface)
-
 	}
 }
