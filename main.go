@@ -45,7 +45,7 @@ func main() {
 		case "b", "black":
 			color = chess.Black
 		default:
-			color = ches.White
+			color = chess.White
 		}
 	}
 
