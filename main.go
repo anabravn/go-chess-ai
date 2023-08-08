@@ -2,7 +2,10 @@ package main
 
 import (
 	"ui"
+	"ai"
+	"fmt"
 
+	"github.com/notnil/chess"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -26,12 +29,14 @@ func main() {
 	defer window.Destroy()
 	surface, _ := window.GetSurface()
 
-	game := ui.NewGame()
+	gameUi := ui.NewGameUI()
+	game := chess.NewGame()
+	gameUi.Update(game)
+
+	var nextMove *chess.Move = nil
 
 	running := true
 	for running {
-		window.UpdateSurface()
-
 		event := sdl.WaitEventTimeout(10)
 		if event != nil {
 			switch event.(type) {
@@ -41,7 +46,24 @@ func main() {
 			}
 		}
 
-		running = game.Update()
-		game.Draw(surface)
+		if game.Position().Turn() == chess.White {
+		    nextMove = gameUi.GetSelectedMove(game)
+		} else {
+		    nextMove = ai.Search(game, 2)
+		}
+
+		if nextMove != nil {
+		    game.Move(nextMove)
+		    gameUi.Update(game)
+		    nextMove = nil
+		}
+
+		if game.Outcome() != chess.NoOutcome {
+		    fmt.Println(game.Outcome(), game.Method())
+		    running = false
+		}
+
+		gameUi.Draw(surface)
+		window.UpdateSurface()
 	}
 }
