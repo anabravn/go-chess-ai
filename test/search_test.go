@@ -27,10 +27,4 @@ func BenchmarkSearch(b *testing.B) {
 			ai.Search(game, 6)
 		}
 	})
-
-	b.Run("Depth = 8", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			ai.Search(game, 8)
-		}
-	})
 }
