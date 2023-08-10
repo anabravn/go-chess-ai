@@ -41,14 +41,13 @@ func main() {
 			os.Exit(1)
 		}
 
-		switch(args[1]) {
+		switch args[1] {
 		case "b", "black":
 			color = chess.Black
 		default:
 			color = chess.White
 		}
 	}
-
 
 	sdl.Init(sdl.INIT_EVERYTHING)
 	defer sdl.Quit()
